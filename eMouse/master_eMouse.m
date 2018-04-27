@@ -1,12 +1,13 @@
-useGPU = 1; % do you have a GPU? Kilosorting 1000sec of 32chan simulated data takes 55 seconds on gtx 1080 + M2 SSD.
+useGPU = 0; % do you have a GPU? Kilosorting 1000sec of 32chan simulated data takes 55 seconds on gtx 1080 + M2 SSD.
 
-fpath    = 'F:\DATA\Spikes\eMouse\'; % where on disk do you want the simulation? ideally and SSD...
+fpath    = '~/DATA/Spikes/eMouse/'; % where on disk do you want the simulation? ideally and SSD...
 if ~exist(fpath, 'dir'); mkdir(fpath); end
 
 % This part adds paths
-addpath(genpath('D:\CODE\GitHub\KiloSort')) % path to kilosort folder
-addpath(genpath('D:\CODE\GitHub\npy-matlab')) % path to npy-matlab scripts
-pathToYourConfigFile = 'D:\CODE\GitHub\KiloSort\eMouse'; % for this example it's ok to leave this path inside the repo, but for your own config file you *must* put it somewhere else!  
+addpath(genpath('~/git/ss/KiloSort/CUDA')) % path to kilosort folder
+addpath(genpath('~/git/ss/KiloSort')) % path to kilosort folder
+addpath(genpath('~/git/npy-matlab')) % path to npy-matlab scripts
+pathToYourConfigFile = '~/git/ss/KiloSort/eMouse'; % for this example it's ok to leave this path inside the repo, but for your own config file you *must* put it somewhere else!  
 
 % Run the configuration file, it builds the structure of options (ops)
 run(fullfile(pathToYourConfigFile, 'config_eMouse.m'))

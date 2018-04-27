@@ -63,20 +63,26 @@ templateFeatures = rez.cProj;
 templateFeatureInds = uint32(rez.iNeigh);
 pcFeatures = rez.cProjPC;
 pcFeatureInds = uint32(rez.iNeighPC);
-plotose=0;
+
+% sort by template ID
+[spikeTemplates,I]=sort(spikeTemplates);
+spikeTimes=spikeTimes(I);
+amplitudes=amplitudes(I);
+templateFeatures=templateFeatures(I,:);
+pcFeatures=pcFeatures(I,:,:);
+
 %% get rid of noisy stuff
 % whos amplitudes templates templatesInds spikeTemplates spikeClusters spikeTimes pcFeatures pcFeatureInds 
 thres_ampl=[-8,8];      
 for ic=unique(spikeTemplates)'
-    %
-    
+    %%
+    ic=40+1;
     i=find(spikeTemplates==ic);
     a=amplitudes(i);
     a=squeeze(pcFeatures(i,:,1));
     for ii=1:3
         a(:,ii)=zscore_median(a(:,ii));
     end
-    if plotose
     try
     clf,
     subplot(3,1,1)
@@ -85,27 +91,27 @@ for ic=unique(spikeTemplates)'
     bar(-1:.4:10,histc(a,-1:.4:10))
     mmyplotvertlines([thres_ampl(1),thres_ampl(2)]);drawnow
 %     pause(.1)
-    end,end
+    end
     % threshold by deviation from the mean
     %TODO actual clustering
     %TODO same for features rather than amplitudes
     ibad=(a(:,1)<thres_ampl(1)) | (a(:,1)>thres_ampl(2))| ...
          (a(:,2)<thres_ampl(1)) | (a(:,2)>thres_ampl(2))| ...
          (a(:,3)<thres_ampl(1)) | (a(:,3)>thres_ampl(2));
-     if plotose
     try
         disp(sum(ibad))
         subplot(3,1,3)
-        plot(a(~ibad,1),a(~ibad,2),'.');drawnow
+        plot(a(~ibad,1),a(~ibad,2),'.')
     end
-     end
     
     if sum(ibad)>0
-        spikeTemplates(i(ibad))=[];
-        amplitudes(i(ibad))=[];
-        spikeTimes(i(ibad))=[];
-        templateFeatures(i(ibad),:)=[];
-        pcFeatures(i(ibad),:,:)=[];
+        spikeTemplates(i)
+        Ibad=find(ibad)+find(i,1,'first');
+        spikeTemplates(Ibad)=[];
+        amplitudes(Ibad)=[];
+        spikeTimes(Ibad)=[];
+        templateFeatures(Ibad,:)=[];
+        pcFeatures(Ibad,:,:)=[];
         % assign a different identity to "bad" spikes for inspection
 %         spikeTemplates(ibad)=max(spikeTemplates)+1;
         %todo resize templates and templatesInds to accommodate new
@@ -113,7 +119,7 @@ for ic=unique(spikeTemplates)'
         
     end
 end    
-% keyboard
+
 %% Write files
 if ~isempty(savePath)
     

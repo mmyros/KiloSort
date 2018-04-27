@@ -1,8 +1,8 @@
-addpath('D:\DATA\Spikes\EvaluationCode')
+% addpath('D:\DATA\Spikes\EvaluationCode')
 % datFilename = '20150601_all.dat';
 %%
-dd = load('C:\DATA\Spikes\set7\20151102_1_ks_results.mat');
-root        = fullfile('C:\DATA\Spikes', sprintf('set%d', idset));
+% dd = load('C:\DATA\Spikes\set7\20151102_1_ks_results.mat');
+% root        = fullfile('C:\DATA\Spikes', sprintf('set%d', idset));
 
 fname       = 'spike_clustersSorted.npy';
     

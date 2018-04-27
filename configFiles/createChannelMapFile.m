@@ -1,33 +1,45 @@
+function createChannelMapFile(fpath,Nchannels,ntrodes)
 %  create a channel map file
+if ~exist('Nchannels','var'),    Nchannels = 16; end
+if ~exist('nshanks','var'),    ntrodes = 2; end
+% connected = true(Nchannels, 1);
+% chanMap   = 1:Nchannels;
+% chanMap0ind = chanMap - 1;
+% xcoords   = ones(Nchannels,1);
+% ycoords   = [1:Nchannels]';
+% kcoords   = ones(Nchannels,1); % grouping of channels (i.e. tetrode groups)
 
-Nchannels = 32;
-connected = true(Nchannels, 1);
-chanMap   = 1:Nchannels;
-chanMap0ind = chanMap - 1;
-xcoords   = ones(Nchannels,1);
-ycoords   = [1:Nchannels]';
-kcoords   = ones(Nchannels,1); % grouping of channels (i.e. tetrode groups)
-
-fs = 25000; % sampling frequency
-save('C:\DATA\Spikes\20150601_chan32_4_900s\chanMap.mat', ...
-    'chanMap','connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs')
+% fs = 30000; % sampling frequency
+% save([fpath 'chanMap.mat'], ...
+%     'chanMap','connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs')
 
 %%
 
-Nchannels = 32;
-connected = true(Nchannels, 1);
-chanMap   = 1:Nchannels;
-chanMap0ind = chanMap - 1;
+if mod(Nchannels,ntrodes)==0
 
-xcoords   = repmat([1 2 3 4]', 1, Nchannels/4);
+    connected = true(Nchannels, 1);
+    chanMap   = 1:Nchannels;
+    chanMap0ind = chanMap - 1;
+    xcoords   = repmat([1:ntrodes]', 1, Nchannels/ntrodes);
+    ycoords   = repmat(1:Nchannels/ntrodes, ntrodes, 1);
+    else%must also include 3 acceleromtere channels
+    
+	   connected = [true(Nchannels-3, 1)',false(3,1)']';
+    chanMap   = 1:Nchannels;
+    chanMap0ind = chanMap - 1;
+    xcoords   = [repmat([1:ntrodes]', 1, (Nchannels-3)/ntrodes)  repmat(ntrodes+3,2,ntrodes)'];
+    ycoords   = [repmat(1:(Nchannels-3)/ntrodes, ntrodes, 1) repmat(Nchannels-2:Nchannels,ntrodes,1)];    
+end
+% keyboard
+
 xcoords   = xcoords(:);
-ycoords   = repmat(1:Nchannels/4, 4, 1);
 ycoords   = ycoords(:);
-kcoords   = ones(Nchannels,1); % grouping of channels (i.e. tetrode groups)
+kcoords   = ycoords;% same as ishank %ones(Nchannels,1); % grouping of channels (i.e. tetrode groups)
 
-fs = 25000; % sampling frequency
+fs = 30000; % sampling frequency
 
-save('C:\DATA\Spikes\Piroska\chanMap.mat', ...
+%%
+save([fpath 'chanMap.mat'], ...
     'chanMap','connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs')
 %%
 
