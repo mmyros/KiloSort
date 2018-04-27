@@ -135,9 +135,9 @@ while 1
     end
     buff = buff';
     buff = buff(:, chanMapConn);
-    noisethr=160; %220 is high
+    noisethr=190; %220 is high. 160 is good for shank rat
     [ibad,jbad]=ind2sub(size(buff),find(abs(buff).*0.195>noisethr));
-    disp(['Percent bad: ',num2str(numel(ibad)/numel(buff)*100)])
+    disp(['Noise threshold: ' num2str(noisethr) 'Percent bad: ',num2str(numel(ibad)/numel(buff)*100)])
     buff = single(buff);
     buff(ibad,jbad)=nan;
     do_medianref=1;
