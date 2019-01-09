@@ -182,12 +182,14 @@ while 1
     end
     buff = buff';
     buff = buff(:, chanMapConn);
-    if do_id_bad_chans,        buff(:, bad_chans)=0;    end
-    noisethr=10000; %220 is high. 160 is good for shank rat. hp14=460
+    if ops.GPU
+    noisethr=12690; %190
+    else
+    noisethr=20000; %220 is high. 160 is good for shank rat
+    end
     [ibad,jbad]=ind2sub(size(buff),find(abs(buff).*0.195>noisethr));
-
-if noisethr<100000
-    disp(['Noise threshold: ' num2str(noisethr) ' Percent bad: ',num2str(numel(ibad)/numel(buff)*100)])
+if noisethr<10000
+disp(['Noise threshold: ' num2str(noisethr) 'Percent bad: ',num2str(numel(ibad)/numel(buff)*100)])
 end
     if numel(ibad)/numel(buff)*100>40
         disp('Too noisy (>40 precent), setting whole buffer to zero...')
