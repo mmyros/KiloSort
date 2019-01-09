@@ -1,11 +1,16 @@
 function rez = fitTemplates(rez, DATA, uproj)
-
 nt0             = rez.ops.nt0;
 rez.ops.nt0min  = ceil(20 * nt0/61);
 
 ops = rez.ops;
 
-rng('default');
+if ops.parfor
+try
+  matlabpool(8)
+  end
+  end
+
+  rng('default');
 rng(1);
 
 Nbatch      = rez.temp.Nbatch;
