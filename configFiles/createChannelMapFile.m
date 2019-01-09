@@ -1,7 +1,9 @@
-function createChannelMapFile(fpath,Nchannels,ntrodes)
+function createChannelMapFile(fpath,Nchannels,ntrodes,kind)
 %  create a channel map file
-if ~exist('Nchannels','var'),    Nchannels = 16; end
-if ~exist('nshanks','var'),    ntrodes = 2; end
+if ~exist('Nchannels','var'),    Nchannels = 16;    end
+if ~exist('nshanks','var'),      ntrodes = 2;       end
+if ~exist('kind',   'var'),      kind   = 'stereo'; end
+
 % connected = true(Nchannels, 1);
 % chanMap   = 1:Nchannels;
 % chanMap0ind = chanMap - 1;
@@ -18,7 +20,11 @@ if ~exist('nshanks','var'),    ntrodes = 2; end
 if mod(Nchannels,ntrodes)==0
 
     connected = true(Nchannels, 1);
-    chanMap   = 1:Nchannels;
+    if strcmp(kind, 'stereo')  
+        chanMap   = 1:Nchannels;    
+    else
+        chanMap   = [1:2:Nchannels 2:2:Nchannels-1];
+    end
     chanMap0ind = chanMap - 1;
     xcoords   = repmat([1:ntrodes]', 1, Nchannels/ntrodes);
     ycoords   = repmat(1:Nchannels/ntrodes, ntrodes, 1);
@@ -39,7 +45,8 @@ kcoords   = ycoords;% same as ishank %ones(Nchannels,1); % grouping of channels 
 fs = 30000; % sampling frequency
 
 %%
-save([fpath 'chanMap.mat'], ...
+disp(['Saving ' fpath '/chanMap.mat'])
+save([fpath '/chanMap.mat'], ...
     'chanMap','connected', 'xcoords', 'ycoords', 'kcoords', 'chanMap0ind', 'fs')
 %%
 

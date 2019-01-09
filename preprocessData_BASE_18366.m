@@ -67,7 +67,7 @@ rez.ops.chanMap = chanMap;
 rez.ops.kcoords = kcoords; 
 disp(ops.fbinary)
 d = dir(ops.fbinary);
-assert(~isempty(d),['Did not find .dat!' ops.fbinary])
+% assert dboule(~isempty(d)), ['Did not find .dat!' ops.fbinary]
 ops.sampsToRead = floor(d.bytes/NchanTOT/2);
 
 if ispc
@@ -82,7 +82,6 @@ nint16s      = memallocated/2;
 
 NTbuff      = NT + 4*ops.ntbuff;
 Nbatch      = ceil(d.bytes/2/NchanTOT /(NT-ops.ntbuff));
-Nbatch = 2700;
 Nbatch_buff = floor(4/5 * nint16s/rez.ops.Nchan /(NT-ops.ntbuff)); % factor of 4/5 for storing PCs of spikes
 Nbatch_buff = min(Nbatch_buff, Nbatch);
 
@@ -112,54 +111,7 @@ end
 if ~exist('DATA', 'var')
     DATA = zeros(NT, rez.ops.Nchan, Nbatch_buff, 'int16');
 end
-%%
-do_id_bad_chans=0
-skip=5;Nbadnessbufs=10000;
-if do_id_bad_chans
-    ibatch=0;
-    %Badness=nan([NchanTOT Nbadnessbufs/skip]); %we dont know when it will
-    Badness=[];
-    %stop
-    for i = 1:Nbadnessbufs
-        ibatch = ibatch + ops.nSkipCov;
 
-        offset = max(0, 2*NchanTOT*((NT - ops.ntbuff) * (ibatch-1) - 2*ops.ntbuff));
-        if ibatch==1
-            ioffset = 0;
-        else
-            ioffset = ops.ntbuff;
-        end
-        fseek(fid, offset, 'bof');
-        if mod(i,skip)==0 % take every 10th for dead chan id
-            buff = fread(fid, [NchanTOT NTbuff], '*int16');
-
-
-            if isempty(buff)
-                break;
-            end
-            nsampcurr = size(buff,2);
-            if nsampcurr<NTbuff
-                buff(:, nsampcurr+1:NTbuff) = repmat(buff(:,nsampcurr), 1, NTbuff-nsampcurr);
-            end
-            
-            Badness(:,i/skip)=std(single(buff)');
-        end
-    end
-    Badness(:,all(Badness==0))=[];
-    badness=nanmean(Badness,2);
-    bad_chans=badness>1500;
-    disp('Bad channels are :')
-    disp(num2str(find(bad_chans)))
-    if mean(bad_chans)>.8
-        error('Too many bad chans! This is crazy')
-    end
-    hist(badness,1e2)
-    
-            %TODO distribution of badness, drop outliers
-end
-
-%%
-ibatch=0;
 isproc = zeros(Nbatch, 1);
 while 1
     ibatch = ibatch + ops.nSkipCov;
@@ -173,6 +125,7 @@ while 1
     fseek(fid, offset, 'bof');
     buff = fread(fid, [NchanTOT NTbuff], '*int16');
     
+    
     if isempty(buff)
         break;
     end
@@ -182,39 +135,16 @@ while 1
     end
     buff = buff';
     buff = buff(:, chanMapConn);
-<<<<<<< HEAD
-    if ops.GPU
-    noisethr=12690; %190
-    else
-    noisethr=1111590; %220 is high. 160 is good for shank rat
-    end
+    noisethr=190; %220 is high. 160 is good for shank rat
     [ibad,jbad]=ind2sub(size(buff),find(abs(buff).*0.195>noisethr));
-if noisethr<10000
-disp(['Noise threshold: ' num2str(noisethr) 'Percent bad: ',num2str(numel(ibad)/numel(buff)*100)])
-=======
-    if do_id_bad_chans,        buff(:, bad_chans)=0;    end
-    noisethr=10000; %220 is high. 160 is good for shank rat. hp14=460
-    [ibad,jbad]=ind2sub(size(buff),find(abs(buff).*0.195>noisethr));
-
-if noisethr<100000
-    disp(['Noise threshold: ' num2str(noisethr) ' Percent bad: ',num2str(numel(ibad)/numel(buff)*100)])
->>>>>>> e691b0e8cea7f801e8271192c5537e62d21f5a0b
-end
-    if numel(ibad)/numel(buff)*100>40
-        disp('Too noisy (>40 precent), setting whole buffer to zero...')
-        buff=zeros(size(buff));
-    else
-        
-    %     buff(ibad,jbad)=nan;
-        do_medianref=1;
-        if do_medianref
-            buff=buff-int16(nanmedian(buff ,2));
-        end
-        buff(ibad,jbad)=0; 
-
-    end
+    disp(['Noise threshold: ' num2str(noisethr) 'Percent bad: ',num2str(numel(ibad)/numel(buff)*100)])
     buff = single(buff);
-    if do_id_bad_chans,        buff(:, bad_chans)=0;    end
+    buff(ibad,jbad)=nan;
+    do_medianref=1;
+    if do_medianref
+        buff=buff-nanmedian(buff,2);
+    end
+    buff(ibad,jbad)=0; 
     
     if ops.GPU
         dataRAW = gpuArray(buff);
@@ -243,7 +173,6 @@ end
         DATA(:,:,ibatch) = gather_try(int16( datr(ioffset + (1:NT),:)));
         isproc(ibatch) = 1;
     end
-    
 end
 CC = CC / ceil((Nbatch-1)/ops.nSkipCov);
 switch ops.whitening
@@ -303,7 +232,6 @@ for ibatch = 1:Nbatch
         fseek(fid, offset, 'bof');
         
         buff = fread(fid, [NchanTOT NTbuff], '*int16');
-        
         if isempty(buff)
             break;
         end
@@ -364,7 +292,7 @@ for ibatch = 1:Nbatch
         datcpu  = gather_try(int16(datr));
         fwrite(fidW, datcpu, 'int16');
     end
-
+    
 end
 
 if strcmp(ops.initialize, 'fromData')

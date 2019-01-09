@@ -194,14 +194,19 @@ for ibatch = 1:Nbatch
     end
     if rem(ibatch,100)==1
 %         nsort = sort(sum(nspikes2,2), 'descend');
-        fprintf(repmat('\b', 1, numel(msg)));
-        msg             = sprintf('Time %2.2f, batch %d/%d,  NTOT %d\n', ...
-            toc, ibatch,Nbatch, size(st3,1));        
-        fprintf(msg);
+        if length(st3)<1
+            disp('No spikes so far!')
+        else
+            fprintf(repmat('\b', 1, numel(msg)));
+            msg             = sprintf('Time %2.2f, batch %d/%d,  NTOT %d\n', ...
+                toc, ibatch,Nbatch, size(st3,1));        
+            fprintf(msg);
+        end
         
     end
 end
 %%
+assert((~isempty(st3)),'No spikes found!!')
 [~, isort]      = sort(st3(:,1), 'ascend');
 st3             = st3(isort,:);
 
