@@ -54,6 +54,7 @@ switch ops.initialize
         WUinit = dWU;
 end
 [W, U, mu, UtU, nu] = decompose_dWU(ops, dWU, Nrank, rez.ops.kcoords);
+
 W0 = W;
 W0(NT, 1) = 0;
 fW = fft(W0, [], 1);
@@ -96,6 +97,7 @@ end
 nswitch = [0];
 msg = [];
 fprintf('Time %3.0fs. Optimizing templates ...\n', toc)
+
 while (i<=Nbatch * ops.nfullpasses+1)
     % set the annealing parameters
     if i<Nbatch*ops.nannealpasses
@@ -214,13 +216,17 @@ while (i<=Nbatch * ops.nfullpasses+1)
         % estimate cost function at this time step
         delta(ibatch) = sum(Cost)/1e3;
     end
-    
+
     % update status
     if ops.verbose  && rem(i,20)==1
         nsort = sort(round(sum(nspikes,2)), 'descend');
         fprintf(repmat('\b', 1, numel(msg)));
-        msg = sprintf('Time %2.2f, batch %d/%d, mu %2.2f, neg-err %2.6f, NTOT %d, n100 %d, n200 %d, n300 %d, n400 %d\n', ...
-            toc, i,Nbatch* ops.nfullpasses,nanmean(mu(:)), nanmean(delta), round(sum(nsort)), ...
+        if isnan(nanmean(delta))
+            disp('Neg err is nan! There will likely be no spikes')
+            
+        end
+        msg = sprintf('Nspikes %2.2f, time %2.2f, batch %d/%d, mu %2.2f, neg-err %2.6f, NTOT %d, n100 %d, n200 %d, n300 %d, n400 %d\n', ...
+            sum(nsp),toc, i,Nbatch* ops.nfullpasses,nanmean(mu(:)), nanmean(delta), round(sum(nsort)), ...
             nsort(min(size(W,2), 100)), nsort(min(size(W,2), 200)), ...
             nsort(min(size(W,2), 300)), nsort(min(size(W,2), 400)));
         fprintf(msg);
